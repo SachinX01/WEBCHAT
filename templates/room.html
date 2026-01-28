@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiVox - Room</title>
+    
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+    <!-- Animate.css (optional, used for animations) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+    <!-- Your custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="room-page">
+
+    <!-- Join screen preview -->
+    <div id="join-screen" class="animate__animated animate__fadeIn">
+        <div class="join-container">
+            <h2>Join Room: <span id="room-id-display">{{ room_id }}</span></h2>
+
+            <div class="preview-container">
+                <video id="local-preview" autoplay muted></video>
+
+                <div class="controls-preview">
+                    <button id="toggle-video" class="control-btn">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button id="toggle-audio" class="control-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="join-form">
+                <input type="text" id="username-input" placeholder="Your name">
+                <button id="enter-room" class="btn">Join Meeting</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room screen after joining -->
+    <div id="room-screen" class="hidden">
+        <div class="room-container">
+
+            <!-- Header with room info -->
+            <div class="meeting-header">
+                <div class="room-info">
+                    <h3>Room: <span id="current-room">{{ room_id }}</span></h3>
+                    <div class="participants-count">
+                        <i class="fas fa-users"></i> <span id="participant-count">1</span>
+                    </div>
+                </div>
+
+                <div class="room-controls">
+                    <button id="toggle-chat" class="control-btn">
+                        <i class="fas fa-comments"></i>
+                    </button>
+                    <button id="share-screen" class="control-btn">
+                        <i class="fas fa-desktop"></i>
+                    </button>
+                    <button id="leave-meeting" class="control-btn leave">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main video and chat content -->
+            <div class="main-content">
+
+                <!-- Video grid where all participant videos appear -->
+                <div class="video-grid" id="video-grid">
+                    <!-- Video containers get dynamically added here -->
+                </div>
+
+                <!-- Chat panel -->
+                <div class="chat-container hidden" id="chat-panel">
+                    <div class="chat-header">
+                        <h3>Meeting Chat</h3>
+                        <button id="close-chat" class="control-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="chat-messages" id="chat-messages"></div>
+
+                    <div class="chat-input">
+                        <input type="text" id="chat-message" placeholder="Type a message...">
+                        <button id="send-message">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Meeting footer with controls -->
+            <div class="meeting-footer">
+                <div class="video-controls">
+                    <button id="room-toggle-audio" class="control-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button id="room-toggle-video" class="control-btn">
+                        <i class="fas fa-video"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Socket.IO library (ensure you have it installed and served on your backend) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.min.js"></script>
+
+    <!-- Room ID for JavaScript -->
+    <script>
+        const ROOM_ID = "{{ room_id }}";
+    </script>
+
+    <!-- Your room.js (you'll need to create this if you haven't yet!) -->
+    <script src="{{ url_for('static', filename='js/room.js') }}"></script>
+
+</body>
+</html>

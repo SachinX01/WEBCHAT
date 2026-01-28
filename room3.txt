@@ -1,0 +1,126 @@
+// Update UI
+                shareScreenBtn.innerHTML = '<i class="fas fa-desktop"></i> Stop';
+                shareScreenBtn.classList.add('active');
+                
+                // Add ended event listener
+                videoTrack.addEventListener('ended', () => {
+                    stopScreenSharing();
+                });
+                
+                isScreenSharing = true;
+                
+            } catch (error) {
+                console.error('Error sharing screen:', error);
+                alert('Could not share screen. Please check permissions.');
+            }
+        } else {
+            stopScreenSharing();
+        }
+    }
+    
+    // Stop screen sharing
+    function stopScreenSharing() {
+        if (!isScreenSharing || !screenStream) return;
+        
+        // Stop all screen tracks
+        screenStream.getTracks().forEach(track => track.stop());
+        
+        // Replace video track back in all peer connections
+        const videoTrack = localStream.getVideoTracks()[0];
+        
+        if (videoTrack) {
+            Object.keys(peers).forEach(peerId => {
+                const sender = peers[peerId].connection
+                    .getSenders()
+                    .find(s => s.track && s.track.kind === 'video');
+                    
+                if (sender) {
+                    sender.replaceTrack(videoTrack);
+                }
+            });
+            
+            // Replace local video
+            const localVideo = document.querySelector('#video-local video');
+            if (localVideo) {
+                localVideo.srcObject = localStream;
+            }
+        }
+        
+        // Update UI
+        shareScreenBtn.innerHTML = '<i class="fas fa-desktop"></i>';
+        shareScreenBtn.classList.remove('active');
+        
+        screenStream = null;
+        isScreenSharing = false;
+    }
+
+    // Leave room
+    function leaveRoom() {
+        // Notify server
+        socket.emit('leave', {
+            room_id: ROOM_ID,
+            username: username,
+            user_id: userId
+        });
+        
+        // Close all peer connections
+        Object.keys(peers).forEach(peerId => {
+            peers[peerId].connection.close();
+        });
+        
+        // Stop local tracks
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+        
+        if (screenStream) {
+            screenStream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Redirect to home page
+        window.location.href = '/';
+    }
+
+    // Handle incoming messages
+    sendMessageBtn.addEventListener('click', sendChatMessage);
+    chatMessageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendChatMessage();
+    });
+
+    // Handle window unload
+    window.addEventListener('beforeunload', () => {
+        if (userId) {
+            socket.emit('leave', {
+                room_id: ROOM_ID,
+                username: username,
+                user_id: userId
+            });
+        }
+    });
+
+    // Handle device change
+    navigator.mediaDevices.addEventListener('devicechange', async () => {
+        console.log('Media devices changed');
+        // Optionally update device selection
+    });
+
+    // Mobile device specific adaptations
+    function setupMobileAdaptation() {
+        // Check if mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            // Add mobile-specific classes
+            document.body.classList.add('mobile-device');
+            
+            // Handle orientation changes
+            window.addEventListener('orientationchange', () => {
+                setTimeout(resizeVideoGrid, 200);
+            });
+        }
+    }
+
+    // Initialize the room
+    init();
+    setupMobileAdaptation();
+});
